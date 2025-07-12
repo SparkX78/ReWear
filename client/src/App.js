@@ -1,37 +1,39 @@
-import React, { useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+// client/src/App.js
+import React, { useEffect, useState } from 'react';
 
 function App() {
+  const [message, setMessage] = useState('');
+  const [items, setItems] = useState([]);
+
   useEffect(() => {
-    fetch('/')
-      .then((res) => res.text())
-      .then((data) => {
-        console.log('Backend says:', data);
-      })
-      .catch((err) => {
-        console.error('API request failed:', err);
-      });
+    // Check backend connectivity
+    fetch(process.env.REACT_APP_API_URL || 'https://rewear-backend.onrender.com/')
+      .then(res => res.text())
+      .then(data => setMessage(data))
+      .catch(err => setMessage('Error connecting to backend'));
+
+    // Fetch some sample items from API
+    fetch((process.env.REACT_APP_API_URL || 'https://rewear-backend.onrender.com') + '/api/items')
+      .then(res => res.json())
+      .then(data => setItems(data))
+      .catch(err => console.error('Failed to fetch items:', err));
   }, []);
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <h1>Welcome to ReWear 👕</h1>
-        <p>Check the browser console for backend message!</p>
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
+      <h1>👕 ReWear – Community Clothing Exchange</h1>
+      <p>{message}</p>
+
+      <h2>Available Clothing Items:</h2>
+      {items.length === 0 ? (
+        <p>No items to display.</p>
+      ) : (
+        <ul>
+          {items.map((item, i) => (
+            <li key={i}>{item.title}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
